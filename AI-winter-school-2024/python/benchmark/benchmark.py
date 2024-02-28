@@ -10,6 +10,7 @@ from threading import Thread
 import numpy as np
 import io
 import math
+from sklearn.metrics import mean_absolute_error, mean_squared_error, mean_squared_log_error, root_mean_squared_error, root_mean_squared_log_error
 
 # Set up logging
 logging.basicConfig(level=logging.INFO)
@@ -135,6 +136,12 @@ class AIWinterSchoolBenchmark:
         # Iterate over all single tasks and gather statistics as needed
         expected_result_column = len(self.test_data.columns) - 1
         error_count = 0
+        # count for exactMatch KPI
+        em_count = 0
+        # reference values
+        ref_list = []
+        # prediction values
+        pred_list = []
         runtimes = []
         for i in range(len(self.test_data)):
             answer_data = self.answers[i]
@@ -145,6 +152,16 @@ class AIWinterSchoolBenchmark:
                 # prediction of the system: answer_data.iloc[0, 1]
                 print(f"expected: {self.test_data.iloc[i, expected_result_column]} predicted: {answer_data.iloc[0, 1]}")
 
+                expected_answer = self.test_data.iloc[i, expected_result_column]
+                ref_list.append(expected_answer)
+                predicted_answer = answer_data.iloc[0, 1]
+                pred_list.append(predicted_answer)
+
+                # logger.info(f"Iteration #{i} : expected answer is {expected_answer} : predicted answer is {predicted_answer}")
+
+                if expected_answer == predicted_answer:
+                    em_count+=1
+                
                 runtimes.append((received_at - self.timestamps_sent[i]) / 1000.0)
             else:
                 ++error_count
@@ -152,6 +169,7 @@ class AIWinterSchoolBenchmark:
         # Determine the KPIs we are interested in
         results = []
         # Here, it would be good to measure some quality...
+        em_percentage = (em_count / len(self.test_data)) * 100
 
         # Average runtime and its standard deviation
         runtime_avg = float('nan')
@@ -169,6 +187,23 @@ class AIWinterSchoolBenchmark:
                                        value=len(self.test_data), data_type="xsd:long"))
         results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"faultyResponses",
                                        value=error_count, data_type="xsd:long"))
+        
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"exactMatch",
+                                       value=em_percentage, data_type="xsd:double"))
+        
+        # sklearn based metrics
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"mae",
+                                       value=mean_absolute_error(ref_list, pred_list), data_type="xsd:double"))
+        
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"mse",
+                                       value=mean_squared_error(ref_list, pred_list), data_type="xsd:double"))
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"msle",
+                                       value=mean_squared_log_error(ref_list, pred_list), data_type="xsd:double"))
+        
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"rmse",
+                                       value=root_mean_squared_error(ref_list, pred_list), data_type="xsd:double"))
+        results.append(BenchmarkResult(kpi_iri=BENCHMARK_NAMESPACE+"rmsle",
+                                       value=root_mean_squared_log_error(ref_list, pred_list), data_type="xsd:double"))
 
         # Send an RDF model with the results to the platform
         self.send_result(results)

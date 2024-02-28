@@ -14,7 +14,13 @@
   hobbit:measuresKPI
     :avgRuntime,
     :stdDevRuntime,
-    :faultyResponses;
+    :faultyResponses,
+    :exactMatch,
+    :mae,
+    :mse,
+    :msle,
+    :rmse,
+    :rmsle;
   hobbit:hasAPI :Api .
 
 :Api a hobbit:API .
@@ -66,3 +72,39 @@
   rdfs:comment "The number of responses provided by the system that couldn't be parsed by the benchmark."@en;
   rdfs:domain hobbit:Experiment, hobbit:Challenge;
   rdfs:range xsd:long .
+
+:exactMatch a hobbit:KPI ;
+  rdfs:label "Exact Match (%)"@en;
+  rdfs:comment "Percentage of predictions that matched exactly to the reference. Higher is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
+
+:mae a hobbit:KPI ;
+  rdfs:label "Mean Absolute Error"@en;
+  rdfs:comment "Mean Absolute Error value. Lower is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
+
+:mse a hobbit:KPI ;
+  rdfs:label "Mean Squared Error"@en;
+  rdfs:comment "Mean Squared Error value. Lower is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
+
+:msle a hobbit:KPI ;
+  rdfs:label "Mean Squared Log Error"@en;
+  rdfs:comment "Mean Squared Log Error value. Lower is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
+
+:rmse a hobbit:KPI ;
+  rdfs:label "Root Mean Squared Error"@en;
+  rdfs:comment "Root Mean Squared Error value. Lower is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
+
+:rmsle a hobbit:KPI ;
+  rdfs:label "Root Mean Squared Log Error"@en;
+  rdfs:comment "Root Mean Squared Log Error value. Lower is better."@en;
+  rdfs:domain hobbit:Experiment, hobbit:Challenge;
+  rdfs:range xsd:double .
